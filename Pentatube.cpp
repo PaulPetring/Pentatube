@@ -88,3 +88,11 @@ uint32_t Pentatube::Color(uint8_t r, uint8_t g, uint8_t b) {
 int Pentatube::numPixels() {
   return 8;
 }
+
+void Pentatube::clear() {
+  for (uint16_t i = 0; i < Pentatube::numPixels(); i++) {
+    _colors[i][0] = 0;
+    _colors[i][1] = 0;
+    _colors[i][2] = 0;
+  }
+}

@@ -19,4 +19,7 @@ https://hackmd.c3d2.de/Pentatube
 | uC    | ATMEL 8-Bit Microncontroller | [AT89C2051-24PU](https://ww1.microchip.com/downloads/en/DeviceDoc/doc0368.pdf) |
 | MYC  | (probably) RGB LED  driver with PWM control. marked: JRC 6060 523 | [NJU6060](https://www.mouser.de/datasheet/2/294/NJU6060_E-52910.pdf) |
 
+## Controller
+
+![Image of possible Controller](https://raw.githubusercontent.com/PaulPetring/Pentatube/master/pictures/minimal_controller.png))
 

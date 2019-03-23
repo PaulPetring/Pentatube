@@ -1,9 +1,10 @@
+/*
 #include "./Pentatube.h"
 #include <WiFi.h>
 #include <ArtnetWifi.h>
 
 const char* ssid = "ssid";
-const char* password = "passwd";
+const char* password = "pass";
 
 ArtnetWifi artnet;
 const int numLeds = 8; // change for your setup
@@ -25,107 +26,92 @@ Pentatube tube = Pentatube(SRCLR, SRCLK, RCLK, SERIN);
 
 byte c = 0;
 
-void setup() {
+// connect to wifi – returns true if successful or false if not
+boolean ConnectWifi(void)
+{
+  boolean state = true;
+  int i = 0;
+
+  WiFi.begin(ssid, password);
+  Serial.println("");
+  Serial.println("Connecting to WiFi");
+
+  // Wait for connection
+  Serial.print("Connecting");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    if (i > 20) {
+      state = false;
+      break;
+    }
+    i++;
+  }
+  if (state) {
+    Serial.println("");
+    Serial.print("Connected to ");
+    Serial.println(ssid);
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println("");
+    Serial.println("Connection failed.");
+  }
+
+  return state;
+}
+
+void initTest()
+{
+  for (int i = 0 ; i < numLeds ; i++)
+    tube.setPixelColor(i, 127, 0, 0);
+  tube.show(1000);
+  delay(500);
+  for (int i = 0 ; i < numLeds ; i++)
+    tube.setPixelColor(i, 0, 127, 0);
+  tube.show(1000);
+  delay(500);
+  for (int i = 0 ; i < numLeds ; i++)
+    tube.setPixelColor(i, 0, 0, 127);
+  tube.show(1000);
+  delay(500);
+  for (int i = 0 ; i < numLeds ; i++)
+    tube.setPixelColor(i, 0, 0, 0);
+  tube.show(1000);
+}
+
+void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
+{
+
+  for (int led = 0; led < 8; led++)
+  {
+    tube.setPixelColor(led, data[0], data[1], data[2]);
+  }
+  tube.show(1);
+
+  previousDataLength = length;
+
+  boolean tail = false;
+
+
+}
+
+void setup()
+{
   Serial.begin(115200);
+  ConnectWifi();
+  artnet.begin();
   tube.begin();
 
-  for (int i = 0; i < 8; i++) {
-    tube.setPixelColor(i, tube.Color(255, 0, 0));
-  }
-  tube.show(1000);
+  initTest();
 
+  // this will be called for each packet received
+  artnet.setArtDmxCallback(onDmxFrame);
 }
 
-
-
-void loop() {
-
-  //colorWipe(tube.Color(255, 0, 0), 25); // Red
-  //colorWipe(tube.Color(0, 255, 0), 25); // Green
-  //colorWipe(tube.Color(0, 0, 255), 25); // Blue
-  //colorWipe(tube.Color(0, 255, 255), 25);  //cyan
-  //colorWipe(tube.Color(255, 0, 255), 25);  //pink
-  //colorWipe(tube.Color(255, 255, 0), 25);  //yellow
-  //theaterChase(tube.Color(255, 255, 255), 25); // White
-  //theaterChase(tube.Color(255, 0, 0), 25); // Red
-  //theaterChase(tube.Color(0, 0, 255), 25); // Blue
-  //theaterChase(tube.Color(0, 255, 255), 25);  //cyan
-  //theaterChase(tube.Color(255, 0, 255), 25);  //pink
-  //theaterChase(tube.Color(255, 255, 0), 25);  //yellow
-  rainbowCycle(10);
-  //rainbow(10);
-  //theaterChaseRainbow(25);
+void loop()
+{
+  // we call the read function inside the loop
+  artnet.read();
 }
-
-void rainbow(uint8_t wait) {
-  uint16_t i, j;
-
-  for (j = 0; j < 256; j++) {
-    for (i = 0; i < 8; i++) {
-      tube.setPixelColor(i, Wheel((i + j) & 255));
-    }
-    tube.show(wait);
-  }
-}
-
-void rainbowCycle(uint8_t wait) {
-  uint16_t i, j;
-
-  for (j = 0; j < 256 * 5; j++) { // 5 cycles of all colors on wheel
-    for (i = 0; i < tube.numPixels(); i++) {
-      tube.setPixelColor(i, Wheel(((i * 256 / tube.numPixels()) + j) & 255));
-    }
-    tube.show(wait);
-  }
-}
-
-void colorWipe(uint32_t c, uint8_t wait) {
-  for (uint16_t i = 0; i < tube.numPixels(); i++) {
-    tube.setPixelColor(i, c);
-    tube.show(wait);
-  }
-}
-
-uint32_t Wheel(byte WheelPos) {
-  WheelPos = 255 - WheelPos;
-  if (WheelPos < 85) {
-    return tube.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-  }
-  if (WheelPos < 170) {
-    WheelPos -= 85;
-    return tube.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-  }
-  WheelPos -= 170;
-  return tube.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-}
-
-//Theatre-style crawling lights.
-void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j = 0; j < 50; j++) { //do 10 cycles of chasing
-    for (int q = 0; q < 3; q++) {
-      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
-        tube.setPixelColor(i + q, c);  //turn every third pixel on
-      }
-      tube.show(wait);
-      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
-        tube.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
-  }
-}
-
-//Theatre-style crawling lights with rainbow effect
-void theaterChaseRainbow(uint8_t wait) {
-  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
-    for (int q = 0; q < 3; q++) {
-      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
-        tube.setPixelColor(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
-      }
-      tube.show(wait);
-
-      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
-        tube.setPixelColor(i + q, 0);      //turn every third pixel off
-      }
-    }
-  }
-}
+*/

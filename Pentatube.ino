@@ -1,9 +1,10 @@
+
 #include "./Pentatube.h"
 
-const int SRCLR   = 4; //ATMEL 15
-const int SRCLK   = 18; //ATMEL 16
-const int RCLK    = 5; //2; //ATMEL 14
-const int SERIN   = 23; //ATMEL 19 MOSI
+const int SRCLR   = 4; //ATMEL 15 //green
+const int SRCLK   = 18; //ATMEL 16 //lila
+const int RCLK    = 5; //2; //ATMEL 14 // brown
+const int SERIN   = 23; //ATMEL 19 MOSI //blau
 //const int MISO = 24; //ATMEL 19 MOSI
 
 Pentatube tube = Pentatube(SRCLR, SRCLK, RCLK, SERIN);
@@ -21,21 +22,26 @@ void setup() {
 
 
 void loop() {
-  colorWipe(tube.Color(255, 0, 0), 250); // Red
-  colorWipe(tube.Color(0, 255, 0), 250); // Green
-  colorWipe(tube.Color(0, 0, 255), 250); // Blue
-  colorWipe(tube.Color(0, 255, 255), 250);  //cyan
-  colorWipe(tube.Color(255, 0, 255), 250);  //pink
-  colorWipe(tube.Color(255, 255, 0), 250);  //yellow
-  theaterChase(tube.Color(255, 255, 255), 25); // White
-  theaterChase(tube.Color(255, 0, 0), 25); // Red
-  theaterChase(tube.Color(0, 0, 255), 25); // Blue
-  theaterChase(tube.Color(0, 255, 255), 25);  //cyan
-  theaterChase(tube.Color(255, 0, 255), 25);  //pink
-  theaterChase(tube.Color(255, 255, 0), 25);  //yellow
-  rainbowCycle(100);
-  rainbow(100);
-  theaterChaseRainbow(25);
+  //colorWipe(tube.Color(255, 0, 0), 250); // Red
+  //colorWipe(tube.Color(0, 255, 0), 250); // Green
+  //colorWipe(tube.Color(0, 0, 255), 250); // Blue
+  //colorWipe(tube.Color(0, 255, 255), 250);  //cyan
+  //colorWipe(tube.Color(255, 0, 255), 250);  //pink
+  //colorWipe(tube.Color(255, 255, 0), 250);  //yellow
+  //theaterChase(tube.Color(255, 255, 255), 25); // White
+  //theaterChase(tube.Color(255, 0, 0), 25); // Red
+  //theaterChase(tube.Color(0, 0, 255), 25); // Blue
+  //theaterChase(tube.Color(0, 255, 255), 25);  //cyan
+  //theaterChase(tube.Color(255, 0, 255), 25);  //pink
+  //theaterChase(tube.Color(255, 255, 0), 25);  //yellow
+  rainbowCycle(25);
+  rainbow(250);
+  //theaterChaseRainbow(25);
+  knightRider(tube.Color(255, 0, 0), 15);
+  knightRider(tube.Color(0, 255, 0), 15);
+  knightRider(tube.Color(255, 255, 0), 15);
+  knightRider(tube.Color(0, 255, 255), 15);
+  knightRider(tube.Color(255, 0, 255), 15);
 }
 
 void rainbow(uint8_t wait) {
@@ -67,6 +73,24 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
+
+
+void knightRider(uint32_t c, uint8_t wait) {
+
+  int cur_pos = 0;
+
+  for (uint16_t j = 0; j < tube.numPixels(); j++) {
+    tube.clear();
+    tube.setPixelColor(j, c);
+    tube.show(wait);
+    tube.setPixelColor(j + 1, c);
+    tube.show(wait);
+    tube.show(wait * 2);
+  }
+
+
+}
+
 uint32_t Wheel(byte WheelPos) {
   WheelPos = 255 - WheelPos;
   if (WheelPos < 85) {
@@ -82,14 +106,14 @@ uint32_t Wheel(byte WheelPos) {
 
 //Theatre-style crawling lights.
 void theaterChase(uint32_t c, uint8_t wait) {
-  for (int j=0; j<50; j++) {  //do 10 cycles of chasing
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < tube.numPixels(); i=i+3) {
-        tube.setPixelColor(i+q, c);    //turn every third pixel on
+  for (int j = 0; j < 50; j++) { //do 10 cycles of chasing
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
+        tube.setPixelColor(i + q, c);  //turn every third pixel on
       }
       tube.show(wait);
-      for (uint16_t i=0; i < tube.numPixels(); i=i+3) {
-        tube.setPixelColor(i+q, 0);        //turn every third pixel off
+      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
+        tube.setPixelColor(i + q, 0);      //turn every third pixel off
       }
     }
   }
@@ -97,16 +121,17 @@ void theaterChase(uint32_t c, uint8_t wait) {
 
 //Theatre-style crawling lights with rainbow effect
 void theaterChaseRainbow(uint8_t wait) {
-  for (int j=0; j < 256; j++) {     // cycle all 256 colors in the wheel
-    for (int q=0; q < 3; q++) {
-      for (uint16_t i=0; i < tube.numPixels(); i=i+3) {
-        tube.setPixelColor(i+q, Wheel( (i+j) % 255));    //turn every third pixel on
+  for (int j = 0; j < 256; j++) {   // cycle all 256 colors in the wheel
+    for (int q = 0; q < 3; q++) {
+      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
+        tube.setPixelColor(i + q, Wheel( (i + j) % 255)); //turn every third pixel on
       }
       tube.show(wait);
 
-      for (uint16_t i=0; i < tube.numPixels(); i=i+3) {
-        tube.setPixelColor(i+q, 0);        //turn every third pixel off
+      for (uint16_t i = 0; i < tube.numPixels(); i = i + 3) {
+        tube.setPixelColor(i + q, 0);      //turn every third pixel off
       }
     }
   }
 }
+

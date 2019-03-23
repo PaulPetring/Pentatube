@@ -10,6 +10,7 @@ class Pentatube
 
     void show(int duration);
     void begin(),
+         clear(),
          setPixelColor(uint16_t n, uint8_t r, uint8_t g, uint8_t b),
          setPixelColor(uint16_t n, uint32_t c);
     int numPixels();
