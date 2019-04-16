@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name pentatube)(type Legacy)(uri ${KIPRJMOD}/pentatube.lib)(options "")(descr ""))
+)
