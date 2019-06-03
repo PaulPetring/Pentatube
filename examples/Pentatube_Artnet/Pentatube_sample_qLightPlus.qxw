@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Workspace>
+<Workspace xmlns="http://www.qlcplus.org/Workspace" CurrentWindow="FixtureManager">
+ <Creator>
+  <Name>Q Light Controller Plus</Name>
+  <Version>4.11.2</Version>
+  <Author>petrin49</Author>
+ </Creator>
+ <Engine>
+  <InputOutputMap>
+   <Universe Name="Universe 1" ID="0">
+    <Output Plugin="ArtNet" Line="2"/>
+   </Universe>
+   <Universe Name="Universe 2" ID="1"/>
+   <Universe Name="Universe 3" ID="2"/>
+   <Universe Name="Universe 4" ID="3"/>
+  </InputOutputMap>
+  <Fixture>
+   <Manufacturer>Generic</Manufacturer>
+   <Model>RGBPanel</Model>
+   <Mode>RGB</Mode>
+   <Weight>100</Weight>
+   <Height>100</Height>
+   <ID>0</ID>
+   <Name>RGB Panel - Row 1</Name>
+   <Universe>0</Universe>
+   <Address>0</Address>
+   <Channels>24</Channels>
+  </Fixture>
+  <FixtureGroup ID="0">
+   <Name>RGB Panel</Name>
+   <Size X="8" Y="1"/>
+   <Head X="0" Y="0" Fixture="0">0</Head>
+   <Head X="1" Y="0" Fixture="0">1</Head>
+   <Head X="2" Y="0" Fixture="0">2</Head>
+   <Head X="3" Y="0" Fixture="0">3</Head>
+   <Head X="4" Y="0" Fixture="0">4</Head>
+   <Head X="5" Y="0" Fixture="0">5</Head>
+   <Head X="6" Y="0" Fixture="0">6</Head>
+   <Head X="7" Y="0" Fixture="0">7</Head>
+  </FixtureGroup>
+  <Function ID="0" Type="Show" Name="New Show 1">
+   <TimeDivision Type="BPM_4_4" BPM="120"/>
+   <Track ID="4" Name="Blue" SceneID="12" isMute="0">
+    <ShowFunction ID="19" StartTime="0" Duration="4000" Color="#556b80"/>
+   </Track>
+   <Track ID="5" Name="Green" SceneID="14" isMute="0">
+    <ShowFunction ID="20" StartTime="1500" Duration="4000" Color="#556b80"/>
+   </Track>
+   <Track ID="6" Name="New Scene" SceneID="16" isMute="0">
+    <ShowFunction ID="21" StartTime="3000" Duration="4000" Color="#556b80"/>
+   </Track>
+  </Function>
+  <Function ID="12" Type="Scene" Name="Blue" Hidden="True">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="0">2,0,5,0,8,0,11,0,14,0,17,0,20,0,23,0</FixtureVal>
+  </Function>
+  <Function ID="13" Type="Sequence" Name="Blue" BoundScene="12">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <SpeedModes FadeIn="Default" FadeOut="Default" Duration="Common"/>
+  </Function>
+  <Function ID="14" Type="Scene" Name="Green" Hidden="True">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="0">1,0,4,0,7,0,10,0,13,0,16,0,19,0,22,0</FixtureVal>
+  </Function>
+  <Function ID="15" Type="Sequence" Name="Green" BoundScene="14">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <SpeedModes FadeIn="Default" FadeOut="Default" Duration="Common"/>
+  </Function>
+  <Function ID="16" Type="Scene" Name="New Scene" Hidden="True">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <FixtureVal ID="0">0,0,3,0,6,0,9,0,12,0,15,0,18,0,21,0</FixtureVal>
+  </Function>
+  <Function ID="17" Type="Sequence" Name="Red" BoundScene="16">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <Direction>Forward</Direction>
+   <RunOrder>Loop</RunOrder>
+   <SpeedModes FadeIn="Default" FadeOut="Default" Duration="Common"/>
+  </Function>
+  <Function ID="18" Type="Sequence" Name="" BoundScene="12">
+   <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+   <Direction>Forward</Direction>
+   <RunOrder>SingleShot</RunOrder>
+   <SpeedModes FadeIn="Default" FadeOut="Default" Duration="Common"/>
+  </Function>
+  <Function ID="19" Type="Sequence" Name="Blue (Copy)" BoundScene="12">
+   <Speed FadeIn="0" FadeOut="1000" Duration="4000"/>
+   <Direction>Backward</Direction>
+   <RunOrder>SingleShot</RunOrder>
+   <SpeedModes FadeIn="PerStep" FadeOut="Common" Duration="PerStep"/>
+   <Step Number="0" FadeIn="1000" Hold="3000" FadeOut="1000" Values="8">0:2,255,5,255,8,255,11,255,14,255,17,255,20,255,23,255</Step>
+  </Function>
+  <Function ID="20" Type="Sequence" Name="Green (Copy)" BoundScene="14">
+   <Speed FadeIn="0" FadeOut="0" Duration="4000"/>
+   <Direction>Backward</Direction>
+   <RunOrder>SingleShot</RunOrder>
+   <SpeedModes FadeIn="PerStep" FadeOut="PerStep" Duration="Common"/>
+   <Step Number="0" FadeIn="1000" Hold="0" FadeOut="1000" Values="8">0:1,255,4,255,10,255,13,255,16,255,19,255,22,255</Step>
+  </Function>
+  <Function ID="21" Type="Sequence" Name="Red (Copy)" BoundScene="16">
+   <Speed FadeIn="0" FadeOut="0" Duration="4000"/>
+   <Direction>Backward</Direction>
+   <RunOrder>SingleShot</RunOrder>
+   <SpeedModes FadeIn="PerStep" FadeOut="PerStep" Duration="Common"/>
+   <Step Number="0" FadeIn="1000" Hold="0" FadeOut="1000" Values="8">0:0,255,3,255,6,255,9,255,12,255,15,255,18,255,21,255</Step>
+  </Function>
+  <Monitor DisplayMode="0" ShowLabels="0">
+   <Font>Arial,12,-1,5,50,0,0,0,0,0</Font>
+   <ChannelStyle>0</ChannelStyle>
+   <ValueStyle>1</ValueStyle>
+   <Grid Width="5" Height="3" Depth="5" Units="0"/>
+  </Monitor>
+ </Engine>
+ <VirtualConsole>
+  <Frame Caption="">
+   <Appearance>
+    <FrameStyle>None</FrameStyle>
+    <ForegroundColor>Default</ForegroundColor>
+    <BackgroundColor>Default</BackgroundColor>
+    <BackgroundImage>None</BackgroundImage>
+    <Font>Default</Font>
+   </Appearance>
+   <Button Caption="Green" ID="0" Icon="">
+    <WindowState Visible="False" X="25" Y="0" Width="50" Height="50"/>
+    <Appearance>
+     <FrameStyle>None</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Function ID="20"/>
+    <Action>Toggle</Action>
+    <Intensity Adjust="False">100</Intensity>
+   </Button>
+   <Button Caption="Blue" ID="1" Icon="">
+    <WindowState Visible="False" X="75" Y="0" Width="50" Height="50"/>
+    <Appearance>
+     <FrameStyle>None</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Function ID="19"/>
+    <Action>Toggle</Action>
+    <Intensity Adjust="False">100</Intensity>
+   </Button>
+   <Button Caption="Red" ID="2" Icon="">
+    <WindowState Visible="False" X="125" Y="0" Width="50" Height="50"/>
+    <Appearance>
+     <FrameStyle>None</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <Function ID="21"/>
+    <Action>Toggle</Action>
+    <Intensity Adjust="False">100</Intensity>
+   </Button>
+   <Slider Caption="Slider 3" ID="3" WidgetStyle="Slider" InvertedAppearance="false">
+    <WindowState Visible="False" X="485" Y="155" Width="60" Height="200"/>
+    <Appearance>
+     <FrameStyle>Sunken</FrameStyle>
+     <ForegroundColor>Default</ForegroundColor>
+     <BackgroundColor>Default</BackgroundColor>
+     <BackgroundImage>None</BackgroundImage>
+     <Font>Default</Font>
+    </Appearance>
+    <SliderMode ValueDisplayStyle="Exact" ClickAndGoType="None">Playback</SliderMode>
+    <Level LowLimit="0" HighLimit="255" Value="0"/>
+    <Playback>
+     <Function>4294967295</Function>
+    </Playback>
+   </Slider>
+  </Frame>
+  <Properties>
+   <Size Width="1920" Height="1080"/>
+   <GrandMaster ChannelMode="Intensity" ValueMode="Reduce" SliderMode="Normal"/>
+  </Properties>
+ </VirtualConsole>
+ <SimpleDesk>
+  <Engine>
+   <CueStack ID="0">
+    <Speed FadeIn="0" FadeOut="0" Duration="4294967295"/>
+    <Cue Name="Cue 1">
+     <Value Channel="0">0</Value>
+     <Value Channel="1">0</Value>
+     <Value Channel="2">255</Value>
+     <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+    </Cue>
+    <Cue Name="Cue 3">
+     <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+    </Cue>
+    <Cue Name="">
+     <Value Channel="0">0</Value>
+     <Value Channel="1">0</Value>
+     <Value Channel="2">255</Value>
+     <Speed FadeIn="0" FadeOut="0" Duration="0"/>
+    </Cue>
+   </CueStack>
+  </Engine>
+ </SimpleDesk>
+</Workspace>

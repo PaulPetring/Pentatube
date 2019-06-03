@@ -1,11 +1,12 @@
 
-#include "./Pentatube.h"
+#include <Pentatube.h>
 
-const int SRCLR   = 4; //ATMEL 15 //green
-const int SRCLK   =  1; //18; //ATMEL 16 //lila //JST2
-const int RCLK    = 22; //5; //2; //ATMEL 14 // brown //JST3
-const int SERIN   = 3; //23; //ATMEL 19 MOSI //blau //JST4
-//const int MISO = 24; //ATMEL 19 MOSI
+// JST1 GND //PIN/
+const int SRCLR   = 22; //3; //ATMEL 15 //green //HIGH //TODO REMOVE
+const int SRCLK   = 18; //ATMEL 16 //lila //JST2  // P30 (Pin 9)
+const int RCLK    = 5; //2; //ATMEL 14 // brown //JST3  // P29 (Pin10)
+const int SERIN   = 23; //ATMEL 19 MOSI //blau //JST4 //P37 (Pin2)
+//JST 5 VCC
 
 Pentatube tube = Pentatube(SRCLR, SRCLK, RCLK, SERIN);
 
@@ -22,7 +23,7 @@ void setup() {
 
 
 void loop() {
-  
+
   colorWipe(tube.Color(255, 0, 0), 250); // Red
   colorWipe(tube.Color(0, 255, 0), 250); // Green
   colorWipe(tube.Color(0, 0, 255), 250); // Blue
@@ -36,12 +37,11 @@ void loop() {
   theaterChase(tube.Color(255, 0, 255), 25);  //pink
   theaterChase(tube.Color(255, 255, 0), 25);  //yellow
 
-  rainbowCycle(25);
-
-  rainbow(250);
+  rainbowCycle(50);
+  rainbow(500);
 
   theaterChaseRainbow(25);
-  
+
   knightRider(tube.Color(255, 0, 0), 15);
   knightRider(tube.Color(0, 255, 0), 15);
   knightRider(tube.Color(255, 255, 0), 15);
@@ -78,6 +78,7 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
+//old people will know, else it's a light from end to end
 void knightRider(uint32_t c, uint8_t wait) {
 
   int cur_pos = 0;
@@ -107,7 +108,7 @@ uint32_t Wheel(byte WheelPos) {
   return tube.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
 }
 
-//Theatre-style crawling lights.
+//Theatre-style crawling lights
 void theaterChase(uint32_t c, uint8_t wait) {
   for (int j = 0; j < 50; j++) { //do 10 cycles of chasing
     for (int q = 0; q < 3; q++) {
