@@ -8,3 +8,10 @@ Supports easy mating of ESP32 module and controller board.
 
 ![MatePlate top view](images/mateplate2.png)
 
+
+## Stencil for Solder Paste
+
+![Solder Paste Stencil](images/solderpaste_stencil.png)
+
+
+
