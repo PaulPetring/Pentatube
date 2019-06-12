@@ -1,18 +1,25 @@
 
 #include <WiFi.h>
 #include <WiFiClient.h>
-#include <WebServer.h>
-#include <ESPmDNS.h>
-#include <Update.h>
-#include <ArtnetWifi.h>
+#include <WiFiMulti.h>
 
+#include <Update.h>
+#include <WebServer.h>
+
+#include <ArtnetWifi.h>
 ArtnetWifi artnet;
 
-int debug_level = 0; //set above 10 for detailed dmx packets on Serial port
+
+
+const char* version = __DATE__ " / " __TIME__;
+
+int debug_level = 5; //set above 10 for detailed dmx packets on Serial port
 
 const char* host = "OTA23";
-const char* ssid = "ssid";
-const char* password = "";
+
+
+int tube_universe = 0;
+int tube_channel_offset=0;
 
 int roundcounter = 0;
 
@@ -29,10 +36,12 @@ const int RCLK    = 5; //2; //ATMEL 14 // brown //JST3  // P29 (Pin10)
 const int SERIN   = 23; //ATMEL 19 MOSI //blau //JST4 //P37 (Pin2)
 //JST 5 VCC
 
+WiFiMulti wifiMulti;
 
 Pentatube tube = Pentatube(SRCLR, SRCLK, RCLK, SERIN);
 
 WebServer server(80);
+
 
 /*
    Server Index Page
@@ -40,6 +49,9 @@ WebServer server(80);
 
 const char* serverIndex =
   "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
+  "Version: " __DATE__ " / " __TIME__ "<br>"
+//  "tube_universe: " char(tube_universe) "<br>"
+//  "tube_channel_offset: " char(tube_channel_offset) "<br>"  
   "<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
   "<input type='file' name='update'>"
   "<input type='submit' value='Update'>"
@@ -77,9 +89,14 @@ const char* serverIndex =
 
 int previousDataLength = 0;
 
+boolean onDmxFrameRunning = false;
+
 void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* data)
 {
+  //if (tube_universe!=universe) { return; }
+  
   roundcounter = 0;
+
   boolean tail = false;
   if (debug_level > 5) {
     Serial.print("DMX: Univ: ");
@@ -111,7 +128,7 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
   //TODO set offset accordingly in multi tube setup
   for (int segment = 0; segment < 8; segment++)
   {
-    int shift = segment * 3;
+    int shift = tube_channel_offset + segment * 3;
     if (data[shift] || data[shift + 1] || data[shift + 2]) {
       tube.setPixelColor(segment, data[shift], data[shift + 1], data[shift + 2]);
     } else {
@@ -119,9 +136,33 @@ void onDmxFrame(uint16_t universe, uint16_t length, uint8_t sequence, uint8_t* d
     }
   }
 
-  tube.show(1);
-  previousDataLength = length;
-  tail = false;
+  //tube.show(1);
+  //previousDataLength = length;
+  //tail = false;
+  //onDmxFrameRunning = false;
+}
+
+
+TaskHandle_t Task1, Task2;
+
+void Task1code( void * pvParameters ) {
+  //Serial.print("Task1 running on core ");
+  //Serial.println(xPortGetCoreID());
+
+  for (;;) {
+    tube.show(1);
+  }
+}
+
+void Task2code( void * pvParameters ) {
+  //Serial.print("Task1 running on core ");
+  //Serial.println(xPortGetCoreID());
+
+  for (;;) {
+    //handle artnet
+    artnet.read();
+    //tube.show(1);
+  }
 }
 
 /*
@@ -145,14 +186,21 @@ void setup(void) {
 
   // Connect to WiFi network
   WiFi.begin(ssid, password);
+  WiFi.setSleep(false);
   Serial.println("");
 
+  wifiMulti.addAP("ssid", "");
+  wifiMulti.addAP("ssid", "pass");
 
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-  }
+
+  Serial.println("Connecting Wifi...");
+    if(wifiMulti.run() == WL_CONNECTED) {
+        Serial.println("");
+        Serial.println("WiFi connected");
+        Serial.println("IP address: ");
+        Serial.println(WiFi.localIP());
+    }
+    
   Serial.println("");
   Serial.print("Connected to ");
   Serial.println(ssid);
@@ -162,13 +210,6 @@ void setup(void) {
   artnet.begin();
   artnet.setArtDmxCallback(onDmxFrame);
 
-  /*use mdns for host name resolution*/
-  if (!MDNS.begin(host)) { //http://ota8.local
-    Serial.println("Error setting up MDNS responder!");
-    while (1) {
-      delay(1000);
-    }
-  }
   Serial.println("mDNS responder started");
   /*return index page which is stored in serverIndex */
   server.on("/", HTTP_GET, []() {
@@ -177,6 +218,8 @@ void setup(void) {
   });
 
   server.on("/rgb", handleRGB);
+  server.on("/artnet", handleArtnetSettings);
+
 
   /*handling uploading firmware file */
   server.on("/update", HTTP_POST, []() {
@@ -188,44 +231,63 @@ void setup(void) {
     if (upload.status == UPLOAD_FILE_START) {
       Serial.printf("Update: %s\n", upload.filename.c_str());
       if (!Update.begin(UPDATE_SIZE_UNKNOWN)) { //start with max available size
-        //Update.printError(Serial);
+        Update.printError(Serial);
       }
     } else if (upload.status == UPLOAD_FILE_WRITE) {
       /* flashing firmware to ESP*/
       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-        //Update.printError(Serial);
+        Update.printError(Serial);
       }
     } else if (upload.status == UPLOAD_FILE_END) {
       if (Update.end(true)) { //true to set the size to the current progress
         Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
       } else {
-        //Update.printError(Serial);
+        Update.printError(Serial);
       }
     }
   });
   server.begin();
+  xTaskCreatePinnedToCore(
+    Task1code,   /* Task function. */
+    "Task1",     /* name of task. */
+    10000,       /* Stack size of task */
+    NULL,        /* parameter of the task */
+    1,           /* priority of the task */
+    &Task1,      /* Task handle to keep track of created task */
+    0);          /* pin task to core 0 */
+
+
 }
 
-//allows requests like http://ip2tube/rgb?segment=0&r=255&g=128&b=0 for fallback 
+//allows requests like http://ip2tube/rgb?segment=0&r=255&g=128&b=0 for fallback
 void handleRGB() { //Handler
   //server.send(200, "text/plain", "Hello world");
   //server.sendHeader("Connection", "close");
   tube.setPixelColor(server.arg(0).toInt(), tube.Color(server.arg(1).toInt(), server.arg(2).toInt(), server.arg(3).toInt()));
-
   server.sendHeader("Connection", "close");
   server.send(200, "text/html", "0:" + server.arg(0) + " 1:" + server.arg(1) + " 2:" + server.arg(2) + " 3:" + server.arg(3));
 }
 
-int color_counter = 0;
+void handleArtnetSettings() { 
+  tube_universe = server.arg(1).toInt();
+  tube_channel_offset = server.arg(2).toInt(); 
+  server.sendHeader("Connection", "close");
+  server.send(200, "text/html", "Set to universe:" + server.arg(0) + " channel_offset:" + server.arg(1));
+}
 
+
+
+int color_counter = 0;
 void loop(void) {
-  //handle http
-  server.handleClient();
-  //handle artnet
+
   artnet.read();
 
   //if no artnet for 5000 rounds, at least show that it's alive on segment 0
-  if (roundcounter > 5000) {
+  if (roundcounter > 50000) {
+
+    if(wifiMulti.run() != WL_CONNECTED) {
+        Serial.println("WiFi not connected!");
+    }    
     color_counter++;
     if (color_counter < 1000) {
       tube.setPixelColor(0, tube.Color(255, 0, 0));
@@ -239,14 +301,18 @@ void loop(void) {
     else {
       color_counter = 0;
     }
-    for (int i = 1; i < 8; i++) { //when in doubt, be blue
-      tube.setPixelColor(i, tube.Color(0, 0, 255));
+    for (int i = 1; i < 8; i++) { //when in doubt, be orange
+      tube.setPixelColor(i, tube.Color(255, 128, 0));
     }
     if (roundcounter > 65000) {
-      roundcounter = 5001;
+      roundcounter = 50001;
     }
+    //handle http (only handle http if there is no artnet
+    server.handleClient();
   }
-  tube.show(1);
+
   roundcounter++;
+
 }
+
 
