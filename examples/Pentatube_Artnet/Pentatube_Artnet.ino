@@ -13,12 +13,12 @@ ArtnetWifi artnet;
 
 const char* version = __DATE__ " / " __TIME__;
 
-int debug_level = 5; //set above 10 for detailed dmx packets on Serial port
+int debug_level = 0; //set above 10 for detailed dmx packets on Serial port
 
 const char* host = "OTA23";
 
 
-int tube_universe = 0;
+int tube_universe = 1;
 int tube_channel_offset=0;
 
 int roundcounter = 0;
@@ -48,44 +48,15 @@ WebServer server(80);
 */
 
 const char* serverIndex =
-  "<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>"
-  "Version: " __DATE__ " / " __TIME__ "<br>"
-//  "tube_universe: " char(tube_universe) "<br>"
-//  "tube_channel_offset: " char(tube_channel_offset) "<br>"  
-  "<form method='POST' action='#' enctype='multipart/form-data' id='upload_form'>"
+  "Pentatube 1 Labore<br>" 
+  "Version: " __DATE__ " / " __TIME__ "<br>" 
+  //"Universe:" tube_universe " tube_channel_offset: " tube_channel_offset "<br>"
+  "<form method='POST' action='/update' enctype='multipart/form-data' id='upload_form'>"
   "<input type='file' name='update'>"
   "<input type='submit' value='Update'>"
   "</form>"
-  "<div id='prg'>progress: 0%</div>"
-  "<script>"
-  "$('form').submit(function(e){"
-  "e.preventDefault();"
-  "var form = $('#upload_form')[0];"
-  "var data = new FormData(form);"
-  " $.ajax({"
-  "url: '/update',"
-  "type: 'POST',"
-  "data: data,"
-  "contentType: false,"
-  "processData:false,"
-  "xhr: function() {"
-  "var xhr = new window.XMLHttpRequest();"
-  "xhr.upload.addEventListener('progress', function(evt) {"
-  "if (evt.lengthComputable) {"
-  "var per = evt.loaded / evt.total;"
-  "$('#prg').html('progress: ' + Math.round(per*100) + '%');"
-  "}"
-  "}, false);"
-  "return xhr;"
-  "},"
-  "success:function(d, s) {"
-  "console.log('success!')"
-  "},"
-  "error: function (a, b, c) {"
-  "}"
-  "});"
-  "});"
-  "</script>";
+  "done.";
+
 
 int previousDataLength = 0;
 
@@ -185,25 +156,21 @@ void setup(void) {
   tube.show(1000);
 
   // Connect to WiFi network
-  WiFi.begin(ssid, password);
   WiFi.setSleep(false);
   Serial.println("");
 
-  wifiMulti.addAP("ssid", "");
-  wifiMulti.addAP("ssid", "pass");
-
-
+  wifiMulti.addAP("Pentatube","");
+ 
   Serial.println("Connecting Wifi...");
     if(wifiMulti.run() == WL_CONNECTED) {
         Serial.println("");
         Serial.println("WiFi connected");
         Serial.println("IP address: ");
+        
         Serial.println(WiFi.localIP());
     }
     
   Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
 
@@ -278,6 +245,8 @@ void handleArtnetSettings() {
 
 
 int color_counter = 0;
+
+
 void loop(void) {
 
   artnet.read();
@@ -289,20 +258,17 @@ void loop(void) {
         Serial.println("WiFi not connected!");
     }    
     color_counter++;
-    if (color_counter < 1000) {
-      tube.setPixelColor(0, tube.Color(255, 0, 0));
-    }
-    else if (color_counter < 2000) {
-      tube.setPixelColor(0, tube.Color(0, 255, 0));
-    }
-    else if (color_counter < 3000) {
+    if (color_counter < 15000) {
       tube.setPixelColor(0, tube.Color(0, 0, 255));
+    }
+    else if (color_counter < 35000) {
+      tube.setPixelColor(0, tube.Color(255, 196, 00));
     }
     else {
       color_counter = 0;
     }
-    for (int i = 1; i < 8; i++) { //when in doubt, be orange
-      tube.setPixelColor(i, tube.Color(255, 128, 0));
+    for (int i = 1; i < 8; i++) { //when in doubt, be blue
+      tube.setPixelColor(i, tube.Color(0, 0, 255));
     }
     if (roundcounter > 65000) {
       roundcounter = 50001;
